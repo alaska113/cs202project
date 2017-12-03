@@ -1,0 +1,20 @@
+            else if (event.type== input.isSpriteClicked(_gridSprite,sf::Mouse::Left, window))
+            {
+                sf::Vector2i touchPoint = input.getMousePosition(this->window);
+                sf::FloatRect gridSize = _gridSprite.getGlobalBounds();
+                //distance between the screen width and the screen width so it's centered
+                sf::Vector2f gapOutsideOfGrid = sf::Vector2f((SCREEN_WIDTH-gridSize.width)/2, (SCREEN_HEIGHT-gridSize.height)/2);
+                //working out touch position relative to the grid
+                sf::Vector2f gridLocalTouchPos = sf::Vector2f(touchPoint.x-gapOutsideOfGrid.x, touchPoint.y - gapOutsideOfGrid.y);
+                
+                sf::Vector2f gridSectionSize = sf::Vector2f(gridSize.width/7, gridSize.height/6);
+                int column, row;
+                //check which column the user has clicked
+                //if it's in the first column it will be less than the size itself
+                if(gridLocalTouchPos.x < gridSectionSize.x)
+                {
+                    _gridPieces[column-1][row-1].setColor(sf::Color(255,255,255,255));
+                }
+                
+                
+            }
