@@ -18,6 +18,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "ResourcePath.hpp"
+#include "InputManager.hpp"
 using std::vector;
 using std::ostream;
 using std::cout;
@@ -42,17 +43,30 @@ class Game
 {
 public:
     Game(std::string title);
+    void setTextures();
+    void setDisplayText(const std::string & txt);
+    void incrementTurn();
+    int getTurn() const;
+    void draw_board(sf::RenderWindow & window);
     void addPiece(Checker & ch);
+    sf::Text windowText();
     vector<vector<sf::Sprite>> getConfig();
-    void check(const Checker &ch);
-    void draw_board();
+    bool check(const Checker &ch);
     bool getStatus() const;
-    //void setGrid(vconst vector<vector<sf::Sprite>> &board);
+    std::string getDisplayText() const;
+    //void setGrid(const vector<vector<sf::Sprite>> &board);
     void setConfig(const Checker &ch);
     void run(); //called when we start our game
+    bool turn();
+    sf::RenderWindow window;
+    InputManager input;
 private:
     vector<vector<sf::Sprite>> _gridPieces;
-    bool _connect4;
+    sf::Sprite _retrySprite;
+    sf::Sprite _gridSprite;
+    int _turn_n;
+    std::string _displayText;
+   
 };
 
 
