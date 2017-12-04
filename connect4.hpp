@@ -27,7 +27,7 @@ using std::cout;
 class Checker
 {
 public:
-    Checker(char color);
+    Checker(int turn_n);
     int getRow() const;
     int getColumn() const;
     char getColorChar() const;
@@ -42,30 +42,90 @@ private:
 class Game
 {
 public:
+    //char setTurn();
+    
+    void print_char_board();
+    
+    void set(int col);
+    
+    //sets the on screen text to tell who's turn it is
+    void turn_name(int turn_n);
+    
+    //Game constructor
     Game(std::string title);
+    
+    //Sets textures for sprites
     void setTextures();
+    
+    //Sets the on screen text given a string
     void setDisplayText(const std::string & txt);
+    
+    //turn increment (not really needed)
     void incrementTurn();
+    
+    //Gets the current turn
     int getTurn() const;
+    
+    //Draws sprites to current window
     void draw_board(sf::RenderWindow & window);
+    
+    //Adds piece to the board, drops to lowest possible row
     void addPiece(Checker & ch);
+    
+    //
     sf::Text windowText();
+    
+    //Accessor of 2D vector of sprites
     vector<vector<sf::Sprite>> getConfig();
-    bool check(const Checker &ch);
+    
+    //Check function that looks for a connect four of the current color
+    //returns true if connect four is found
+    void check(const Checker &ch);
+    
+    //Accessor of connect four status (might not be needed)
     bool getStatus() const;
+    
+    void setStatus(bool s);
+
+    
+    //Gets the onscreen text
     std::string getDisplayText() const;
     //void setGrid(const vector<vector<sf::Sprite>> &board);
+    
+    //Mutator that sets the 2D vector of sprites
     void setConfig(const Checker &ch);
+    
+    //Game start
     void run(); //called when we start our game
+    
+    //will change soon
     bool turn();
+    
+    //initializes a clock
+    sf::Clock _clock;
+    
+    //initializes window
     sf::RenderWindow window;
+    
+    //inititalizes user input
     InputManager input;
 private:
+    //2D vector of sprites
     vector<vector<sf::Sprite>> _gridPieces;
+    
+    //Retry button sprite
     sf::Sprite _retrySprite;
+    
+    //Board sprite
     sf::Sprite _gridSprite;
+    
+    //turn number
     int _turn_n;
+    
+    //onscreen text
     std::string _displayText;
+    
+    bool _connect4;
    
 };
 

@@ -34,8 +34,16 @@ using std::setw;
 /////////////////
 
 //Default Constructor
-Checker::Checker(char color) : _color(color)
-{}
+Checker::Checker(int turn_n)
+{
+    //Vector of red or blue colors and screen text
+    vector<char> turn_color = {'r','y'};
+  
+    
+    //Set color for checking use
+    Checker::setColorChar(turn_color[turn_n%2]);
+}
+
 
 //Checker index and color accessors
 int Checker::getRow() const
@@ -69,10 +77,35 @@ void Checker::setColorChar(char color)
 //////////////
 //Game Stuff//
 //////////////
+void Game::print_char_board()
+{
+    vector<vector<sf::Sprite>> v = Game::getConfig();
+    char gcolor;
+    for(int i = 0;i<6;++i)
+    {
+        for(int j =0;j<7;++j)
+        {
+            if(v[i][j].getColor()==sf::Color::Red)
+            {
+                gcolor = 'r';
+            }
+            if(v[i][j].getColor()==sf::Color::Yellow)
+            {
+                gcolor = 'y';
+            }
+            if(v[i][j].getColor() == sf::Color::White)
+            {
+                gcolor = 'e';
+            }
+            std::cout << gcolor << setw(2);
+        }
+        std::cout << std::endl;
+    }
+}
 
 //Check function that takes a "board" and the color to check,
 //then tells user if it has found a connect fou
-bool Game::check(const Checker &ch)
+void Game::check(const Checker &ch)
 {
     char gcolor;
     char color = ch.getColorChar();
@@ -111,13 +144,10 @@ bool Game::check(const Checker &ch)
             //If a connect four is found, tell user where it is.
             if(sum4==4)
             {
-//                cout << "there is a connect 4 horizontally at (" << i << "," << j << ")" << "for color " << color << endl;
-                return 1;
+                Game::setStatus(1);
             }
         }
-        //cout << "There is no horizontal connect 4 in row " << i << endl;
         sum4=0;
-        //cout << endl;
     }
     
     
@@ -151,13 +181,10 @@ bool Game::check(const Checker &ch)
             //If a connect four is found, tell user where it is.
             if(sum4==4)
             {
-               // cout << "There is a connect 4 vertically at (" << j << "," << i << ")" << "for color " << color << endl;
-                return 1;
+                Game::setStatus(1);
             }
         }
         sum4=0;
-        //cout << "There is no vertical connect 4 in column "<< i << endl;
-        //cout << endl;
     }
     
     //positive diagonal
@@ -205,15 +232,9 @@ bool Game::check(const Checker &ch)
                 //If sequential counter is 4, let user know where a connect four has been made.
                 if(sum4==4)
                 {
-                    //cout << "there is a connect 4 positive diagonally at (" << i << "," << j << ")" << "for color " << color << endl;
-                    return 1;
-                    
+                    Game::setStatus(1);
                 }
             }
-            //If we make it all the way on a positive diagonal without a connect four,
-            //set sequential counter to zero and let user know there is not a connect four there.
-            
-            //cout << "There is no connect 4 in the positive diagonal direction from ("<< i << "," << j << ")" << endl;
         }
     }
     //negative diagonal
@@ -263,17 +284,11 @@ bool Game::check(const Checker &ch)
                 //If sequential counter is 4, let user know where a connect four has been made.
                 if(sum4==4)
                 {
-                   // cout << "there is a connect 4 negative diagonally at (" << i << "," << j << ")" << "for color " << color << endl;
-                    return 1;
+                    Game::setStatus(1);
                 }
             }
-            //If we make it all the way on a negative diagonal without a connect four,
-            //set sequential counter to zero and let user know there is not a connect four there.
-            
-            //cout << "There is no connect 4 in the positive diagonal direction from ("<< i << "," << j << ")" << endl;
         }
     }
-    return 0;
 }
 
 //Piece drop function
@@ -284,7 +299,7 @@ void Game::addPiece(Checker & ch)
     if(_gridPieces[0][ch.getColumn()].getColor() != sf::Color::White)
     {
        // throw runtime_error("Column full! Try another please.");
-       // std::cout << 
+       // std::cout <<
         //turn(turn_n);
     }
     
@@ -358,18 +373,62 @@ Game::Game(std::string title)
     run();
 }
 
-//Mutator of turn number (might not need)
-void Game::incrementTurn()
+void Game::turn_name(int turn_n)
 {
-    ++_turn_n;
+    vector<std::string> turn_v = {"Red's turn!", "Yellow's turn!"};
+    //Set display text to implicate turn
+    Game::setDisplayText(turn_v[turn_n%2]);
 }
-
 //Accessor of turn number
 int Game::getTurn() const
 {
     return _turn_n;
 }
 
+bool Game::getStatus() const
+{
+    return _connect4;
+}
+
+void Game::setStatus(bool s)
+{
+    _connect4 = s;
+}
+
+void Game::set(int col)
+{
+    //////////////////////////////////////
+    //1// Set Turn/Color and Prompt User
+    
+    Checker Piece = Checker(Game::getTurn());
+    Piece.setColumn(col);
+    turn_name(_turn_n);
+    //draws board, more specifically prompts user after turn is set.
+    draw_board(window);
+    ////////////////////////////////////
+    
+    /////////////////////////////////////////////////////////////////////
+    //4// Add Piece
+    Game::addPiece(Piece);
+    //4a// if column is full, reset turn
+    if(_gridPieces[0][Piece.getColumn()].getColor() != sf::Color::White)
+    {
+    }
+    //5// Draw Board after piece drop
+    Game::draw_board(window);
+    Game::check(Piece);
+    //6a// if true, tell user and reccomend retry button
+    if(getStatus() == 1)
+    {
+        std::cout << "I AM BEING CALLED at the end" << std::endl;
+        Game::setDisplayText("A connect 4 has been made!");
+        Game::draw_board(window);
+    }
+    Game::print_char_board();
+    //6b// if not, continue to next turn
+
+    ++_turn_n;
+}
 
 //Run function that constructs window, sprites, etc. Then takes turns playing game.
 void Game::run()
@@ -383,6 +442,9 @@ void Game::run()
     
     // create the window
     window.create(sf::VideoMode(SCREEN_WIDTH,SCREEN_HEIGHT), "Connect 4");
+    window.setFramerateLimit(60);
+    window.setKeyRepeatEnabled(false);
+
     
     //RETRY BUTTON//
     //load retry button
@@ -422,49 +484,58 @@ void Game::run()
         }
     }
     
+    bool _connect4 = false;
+    
     
     // run the program as long as the window is open
     while (window.isOpen())
     {
-        Game::incrementTurn();
         
-        // check all the window's events that were triggered since the last iteration of the loop
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            Game::turn();
-            // "close requested" event: we close the window
-            if (event.type == sf::Event::Closed)
+        Game::draw_board(window);
+            // check all the window's events that were triggered since the last iteration of the loop
+            sf::Event event;
+        
+            while(window.pollEvent(event))
             {
-                window.close();
-            }
-            else if (event.type== input.isSpriteClicked(_gridSprite,sf::Mouse::Left,window))
-            {
-                sf::Vector2i touchPoint = input.getMousePosition(this->window);
-                sf::FloatRect gridSize = _gridSprite.getGlobalBounds();
-                
-                //distance between the screen width and the screen width so it's centered
-                sf::Vector2f gapOutsideOfGrid = sf::Vector2f((SCREEN_WIDTH-gridSize.width)/2, (SCREEN_HEIGHT-gridSize.height)/2);
-                
-                //working out touch position relative to the grid
-                sf::Vector2f gridLocalTouchPos = sf::Vector2f(touchPoint.x-gapOutsideOfGrid.x, touchPoint.y - gapOutsideOfGrid.y);
-                
-                sf::Vector2f gridSectionSize = sf::Vector2f(gridSize.width/7, gridSize.height/6);
-                int column, row;
-                
-                //check which column the user has clicked
-                //if it's in the first column it will be less than the size itself
-                if(gridLocalTouchPos.x < gridSectionSize.x)
+                switch(event.type)
                 {
-                    _gridPieces[column-1][row-1].setColor(sf::Color(255,255,255,255));
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+                    case sf::Event::KeyPressed:
+                        if (event.key.code == sf::Keyboard::Num0)
+                        {
+                            Game::set(0);
+                        }
+                        if (event.key.code == sf::Keyboard::Num1)
+                        {
+                            Game::set(1);
+                        }
+                        if (event.key.code == sf::Keyboard::Num2)
+                        {
+                            Game::set(2);
+                        }
+                        if (event.key.code == sf::Keyboard::Num3)
+                        {
+                            Game::set(3);
+                        }
+                        if (event.key.code == sf::Keyboard::Num4)
+                        {
+                            Game::set(4);
+                        }
+                        if (event.key.code == sf::Keyboard::Num5)
+                        {
+                            Game::set(5);
+                        }
+                        if (event.key.code == sf::Keyboard::Num6)
+                        {
+                            Game::set(6);
+                        }
                 }
                 
-                
             }
-        }
-        //draw the window's new configuration
-        Game::draw_board(window);
     }
+    
 }
 
 //Function to be called at the end of each turn, takes current window and redraws configuration to screen
@@ -513,28 +584,3 @@ void Game::draw_board(sf::RenderWindow & window)
     
 }
 
-
-bool Game::turn()
-{
-    //Vector of red or blue colors and screen text
-    vector<char> turn_color = {'r','y'};
-    vector<std::string> turn_name = {"Red's turn!", "Yellow's turn!"};
-    
-    //Set display text to implicate turn
-    Game::setDisplayText(turn_name[getTurn()%2]);
-    
-    //Set color for checking use
-    char color  = turn_color[getTurn()%2];
-    
-    //Declare checker with color
-    Checker Piece = Checker(color);
-    
-    //testing by setting column
-    Piece.setColumn(0);
-    
-    //adds piece for testing
-    Game::addPiece(Piece);
-    
-    //checks board and returns whether or not a connect 4 was made with boolean
-    return Game::check(Piece);
-}
