@@ -1,79 +1,72 @@
 /* 
-in hpp, include sf::Clock _clock
+Needs to be in a Draw() function that is called by the MouseMoved event. 
+Each time the mouse moves (as determined by the continuous event loop) this function will be called to highlight
+the correct row and column.
 */
-
-sf::Clock clock; // starts the clock
-
-if (event.type == sf::Event::MouseMoved)
+Draw()
             {
-
                 //gets location of mouse
-                sf::Vector2i movePoint = input.getMousePosition(this->window);
+                sf::Vector2i movePoint = sf::Mouse::getPosition();
+//                sf::Vector2i movePoint = input.getMousePosition(this->window);
+//                sf::Vector2i movePoint {event.mouseButton.x,event.mouseButton.y};
                 //gets the grid size of _gridSprite
                 sf::FloatRect gridSize = _gridSprite.getGlobalBounds();
-                
-                sf::Vector2f gapOutsideOfGrid = sf::Vector2f((SCREEN_WIDTH-gridSize.width)/2, (SCREEN_HEIGHT-gridSize.height)/2);
+                sf::Vector2f outsideGrid = sf::Vector2f((SCREEN_WIDTH-gridSize.width)/2, (SCREEN_HEIGHT-gridSize.height)/2);
                 //working out touch position relative to the grid
-                sf::Vector2f gridLocalTouchPos = sf::Vector2f(movePoint.x-gapOutsideOfGrid.x, movePoint.y - gapOutsideOfGrid.y);
-                
-                sf::Vector2f gridSectionSize = sf::Vector2f(gridSize.width/7, gridSize.height/6);
+                sf::Vector2f gridLocalTouchPos = sf::Vector2f(movePoint.x-outsideGrid.x, movePoint.y - outsideGrid.y);
+                sf::Vector2f columnSize = sf::Vector2f((gridSize.width+110)/7,gridSize.height/6);
                 int column, row;
-                
-                //check which column the user has clicked
-                //if it's in the first column it will be less than the size itself
-                if(gridLocalTouchPos.x < gridSectionSize.x)
+                std::cout<<movePoint.x<<" "<<columnSize.x<<" "<<std::endl;
+//                check which column the user has clicked
+//                if it's in the first column it will be less than the size itself
+                if(gridLocalTouchPos.x+50 < columnSize.x)
                 {
-                    clock.restart();
-                    if(_clock.getElapsedTime().asSeconds()<1)
+                    for(row=0;row<6;row++)
                     {
-                        for(row=0;row<6;row++)
-                        {
-                            _gridPieces[row][0].setColor(sf::Color::Green);
-                        }
+                        _gridPieces[row][0].setColor(sf::Color::Green);
                     }
                 }
-                else if (gridLocalTouchPos.x <gridSectionSize.x * 2)
+                else if(gridLocalTouchPos.x > columnSize.x*1 && gridLocalTouchPos.x < columnSize.x*2 )
                 {
                     for(row=0;row<6;row++)
                     {
                         _gridPieces[row][1].setColor(sf::Color::Green);
                     }
                 }
-                else if (gridLocalTouchPos.x <gridSectionSize.x * 3)
+                else if(gridLocalTouchPos.x > columnSize.x*2 && gridLocalTouchPos.x < columnSize.x*3)
                 {
                     for(row=0;row<6;row++)
                     {
                         _gridPieces[row][2].setColor(sf::Color::Green);
                     }
                 }
-                else if (gridLocalTouchPos.x <gridSectionSize.x * 4)
+                else if(gridLocalTouchPos.x > columnSize.x*3 && gridLocalTouchPos.x < columnSize.x*4)
                 {
                     for(row=0;row<6;row++)
                     {
                         _gridPieces[row][3].setColor(sf::Color::Green);
                     }
                 }
-                else if (gridLocalTouchPos.x <gridSectionSize.x * 5)
+                else if(gridLocalTouchPos.x > columnSize.x*4 && gridLocalTouchPos.x < columnSize.x*5)
                 {
                     for(row=0;row<6;row++)
                     {
                         _gridPieces[row][4].setColor(sf::Color::Green);
                     }
                 }
-                else if (gridLocalTouchPos.x <gridSectionSize.x * 6)
+                else if(gridLocalTouchPos.x > columnSize.x*5 && gridLocalTouchPos.x < columnSize.x*6)
                 {
                     for(row=0;row<6;row++)
                     {
                         _gridPieces[row][5].setColor(sf::Color::Green);
                     }
                 }
-                else if (gridLocalTouchPos.x <gridSize.width)
+                else if(gridLocalTouchPos.x > columnSize.x*6)
                 {
                     for(row=0;row<6;row++)
                     {
                         _gridPieces[row][6].setColor(sf::Color::Green);
                     }
                 }
-                clock.restart();
 
             }
