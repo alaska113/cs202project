@@ -8,7 +8,6 @@
 
 #include "connect4.hpp"
 #include "InputManager.hpp"
-//#include "4_check.hpp"
 #include <ctime>
 #include <stdlib.h>
 #include <time.h>
@@ -22,7 +21,6 @@
 #include <SFML/Graphics.hpp>
 #include "ResourcePath.hpp"
 #include <stdexcept>
-using std::runtime_error;
 using std::ostream;
 using std::endl;
 using std::cout;
@@ -38,7 +36,7 @@ Checker::Checker(int turn_n)
 {
     //Vector of red or blue colors and screen text
     vector<char> turn_color = {'r','y'};
-  
+    
     
     //Set color for checking use
     Checker::setColorChar(turn_color[turn_n%2]);
@@ -77,6 +75,8 @@ void Checker::setColorChar(char color)
 //////////////
 //Game Stuff//
 //////////////
+
+//for use in debugging
 void Game::print_char_board()
 {
     vector<vector<sf::Sprite>> v = Game::getConfig();
@@ -107,14 +107,19 @@ void Game::print_char_board()
 //then tells user if it has found a connect fou
 void Game::check(const Checker &ch)
 {
-    char gcolor='x';
+    //initializes temporary color property
     sf::Color color;
+    
+    //If checker color property is red, set color check to red
     if(ch.getColorChar() == 'r')
         color = sf::Color::Red;
+    //else set to yellow
     else
         color = sf::Color::Yellow;
     
+    //Get checker sprite configuration
     vector<vector<sf::Sprite>> v = Game::getConfig();
+    
     
     //sets sum for counting sequential checkers to zero.
     int sum4 = 0;
@@ -123,8 +128,8 @@ void Game::check(const Checker &ch)
     //loop through rows
     for(auto i=0u;i<6;++i)
     {
+        //Sets sum to zero before checking next row
         sum4=0;
-        cout << i << " " << sum4 << endl;
         //loop through columns
         for(auto j=0u;j<7;++j)
         {
@@ -132,7 +137,6 @@ void Game::check(const Checker &ch)
             if(v[i][j].getColor()==color)
             {
                 ++sum4;
-                cout << i<<j<<" add1 " << sum4 << endl;
             }
             //if not, set sequential count back to zero.
             else
@@ -142,12 +146,11 @@ void Game::check(const Checker &ch)
             //If a connect four is found, tell user where it is.
             if(sum4==4)
             {
+                //Sets connect 4 status to true.
                 Game::setStatus(true);
             }
         }
-
     }
-    
     
     //vertical check
     
@@ -172,6 +175,7 @@ void Game::check(const Checker &ch)
                 Game::setStatus(true);
             }
         }
+        //sets sum to 0 before next column
         sum4=0;
     }
     
@@ -187,7 +191,7 @@ void Game::check(const Checker &ch)
             //where k is the length of pieces from current index.
             for(int k = 0;k<6;++k)
             {
-               
+                
                 
                 //If we try to go an index above the board, or an index to the right of the board
                 //Tell user that we are breaking the boundary and set counter of sequential pieces to zero.
@@ -198,7 +202,7 @@ void Game::check(const Checker &ch)
                     sum4=0;
                     break;
                 }
-
+                
                 //If checker k spaces to the right and k spaces up matches
                 //add to sequential counter.
                 if(v[i-k][j+k].getColor()==color)
@@ -210,7 +214,7 @@ void Game::check(const Checker &ch)
                 {
                     sum4 = 0;
                 }
-                //If sequential counter is 4, let user know where a connect four has been made.
+                //If a connect 4 has been made, set status to true
                 if(sum4==4)
                 {
                     Game::setStatus(true);
@@ -265,26 +269,24 @@ void Game::check(const Checker &ch)
 void Game::addPiece(Checker & ch)
 {
     
+    ///////////////////////////FIX THIS///////////////////////////////
     //If the column is already full, prompt user to try another column
     if(_gridPieces[0][ch.getColumn()].getColor() != sf::Color::White)
     {
-       // throw runtime_error("Column full! Try another please.");
-       // std::cout <<
+        // throw runtime_error("Column full! Try another please.");
+        // std::cout <<
         //turn(turn_n);
     }
+    ////////////////////////////////////////////////////////////////////
     
-    //vector<vector<sf::Sprite>> v = getConfig();
     //initialize empty space counter
     int k = 0;
     
     //Loop through rows
     for(int i = 0;i<6;++i)
     {
-        //char gcolor = 'u';
         int row  = i;
         int column = ch.getColumn();
-        //std::cout << "row is " << row << " column is " << column << std::endl;
-        //sf::Sprite current =v[i][ch.getColumn()];
         if(_gridPieces[row][column].getColor() != sf::Color::White)
         {
             break;
@@ -343,9 +345,15 @@ Game::Game(std::string title)
     run();
 }
 
+//Function that sets the red or yellow turn based on the turn number
 void Game::turn_name(int turn_n)
 {
+    //First iterate turn
+    ++turn_n;
+    
+    //Initializes turn description vector
     vector<std::string> turn_v = {"Red's turn!", "Yellow's turn!"};
+    
     //Set display text to implicate turn
     Game::setDisplayText(turn_v[turn_n%2]);
 }
@@ -367,36 +375,34 @@ void Game::setStatus(bool s)
 
 void Game::set(int col)
 {
-    //////////////////////////////////////
     //1// Set Turn/Color and Prompt User
-    
     Checker Piece = Checker(Game::getTurn());
     Piece.setColumn(col);
     turn_name(_turn_n);
+    
     //draws board, more specifically prompts user after turn is set.
     draw_board(window);
-    ////////////////////////////////////
     
-    /////////////////////////////////////////////////////////////////////
     //4// Add Piece
     Game::addPiece(Piece);
     //4a// if column is full, reset turn
     if(_gridPieces[0][Piece.getColumn()].getColor() != sf::Color::White)
     {
     }
+    
     //5// Draw Board after piece drop
     Game::draw_board(window);
     Game::check(Piece);
+    
     //6a// if true, tell user and reccomend retry button
     if(getStatus())
     {
-        std::cout << "I AM BEING CALLED at the end" << std::endl;
-        Game::setDisplayText("A connect 4 has been made!");
+        Game::setDisplayText("Connect 4!");
         Game::draw_board(window);
     }
-    Game::print_char_board();
+   // Game::print_char_board();
+    
     //6b// if not, continue to next turn
-
     ++_turn_n;
 }
 
@@ -412,28 +418,33 @@ void Game::run()
     
     // create the window
     window.create(sf::VideoMode(SCREEN_WIDTH,SCREEN_HEIGHT), "Connect 4");
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(20);
     window.setKeyRepeatEnabled(false);
-
+    
     
     //RETRY BUTTON//
     //load retry button
     sf::Texture textureRetry;
     textureRetry.loadFromFile("Retry Button.png");
     _retrySprite.setTexture(textureRetry);
-    _retrySprite.setPosition(1000, 50);
+    _retrySprite.setPosition(SCREEN_WIDTH-270, SCREEN_HEIGHT-675);
     
     //BOARD//
     //Creates board texture
-    sf::Texture _gridTexture; //declare board texture
+    sf::Texture _gridTexture;
+    //Loads texture for board
     _gridTexture.loadFromFile("Connect4_Board.png"); //Set texture to board image
+    //Sets board texture to board sprite
     _gridSprite.setTexture(_gridTexture);
+    //Sets position of board sprite
     _gridSprite.setPosition((SCREEN_WIDTH/2)-(_gridSprite.getGlobalBounds().width/2), (SCREEN_HEIGHT/2)-(_gridSprite.getGlobalBounds().height/2));
     
     //PIECES//
     //Make texture for empty piece
     sf::Texture texturePlain;
+    //Loads texture for piece
     texturePlain.loadFromFile("gray_piece.png");
+    //Sets size of piece
     sf::Vector2u tempSpriteSize = texturePlain.getSize();
     
     //Nested loops set the pieces in place and makes empty spaces
@@ -454,58 +465,156 @@ void Game::run()
         }
     }
     
+    //sets connect 4 status to flase
     bool _connect4 = false;
     
+    //Tells user first turn
+    Game::setDisplayText("Red's turn!");
     
     // run the program as long as the window is open
     while (window.isOpen())
     {
         
+        //Draws the board first
         Game::draw_board(window);
-            // check all the window's events that were triggered since the last iteration of the loop
-            sf::Event event;
         
-            while(window.pollEvent(event))
+        //Declares event
+        sf::Event event;
+        
+        // check all the window's events that were triggered since the last iteration of the loop
+        while(window.pollEvent(event))
+        {
+            
+            //Switch to set multiple cases of events
+            switch(event.type)
             {
-                switch(event.type)
-                {
-                    case sf::Event::Closed:
-                        window.close();
+                    
+                    //If window is set to close, close window.
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                    
+                    //If a key was pressed
+                case sf::Event::KeyPressed:
+                    
+                    //If the key that was pressed is 1, choose column 0
+                    if (event.key.code == sf::Keyboard::Num1)
+                    {
+                        Game::set(0);
                         break;
-                    case sf::Event::KeyPressed:
-                        if (event.key.code == sf::Keyboard::Num0)
+                    }
+                    //" "
+                    if (event.key.code == sf::Keyboard::Num2)
+                    {
+                        Game::set(1);
+                        break;
+                    }
+                    if (event.key.code == sf::Keyboard::Num3)
+                    {
+                        Game::set(2);
+                        break;
+                    }
+                    if (event.key.code == sf::Keyboard::Num4)
+                    {
+                        Game::set(3);
+                        break;
+                    }
+                    if (event.key.code == sf::Keyboard::Num5)
+                    {
+                        Game::set(4);
+                        break;
+                    }
+                    if (event.key.code == sf::Keyboard::Num6)
+                    {
+                        Game::set(5);
+                        break;
+                    }
+                    if (event.key.code == sf::Keyboard::Num7)
+                    {
+                        Game::set(6);
+                        break;
+                    }
+                case sf::Event::MouseButtonPressed:
+                    if (event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        sf::Vector2i touchPoint {event.mouseButton.x,event.mouseButton.y};
+                        
+                        sf::FloatRect gridSize = _gridSprite.getGlobalBounds();
+                        
+                        //distance between the screen width and the screen width so it's centered
+                        sf::Vector2f outsideGrid = sf::Vector2f((SCREEN_WIDTH-gridSize.width)/2, (SCREEN_HEIGHT-gridSize.height)/2);
+                        
+                        //touch position relative to the grid, as if the origin started at the top left hand corner of the grid
+                        sf::Vector2f gridLocalTouchPos = sf::Vector2f(touchPoint.x-outsideGrid.x, touchPoint.y - outsideGrid.y);
+                        
+                        //get the actual (x,y) width/height of each grid column and row
+                        sf::Vector2f columnSize = sf::Vector2f(gridSize.width/7, gridSize.height/6);
+                        
+                        int column, row=0;
+                        //check which column the user has clicked
+                        
+                        //if it's in the first column, the x coordinate of the gridLocalTouchPos will be less than the size of the column itself
+                        if(gridLocalTouchPos.x < columnSize.x)
                         {
-                            Game::set(0);
+                            for(row=0;row<6;row++)
+                            {
+                                set(0);
+                                break;
+                            }
                         }
-                        if (event.key.code == sf::Keyboard::Num1)
+                        else if(gridLocalTouchPos.x < columnSize.x*2)
                         {
-                            Game::set(1);
+                            for(row=0;row<6;row++)
+                            {
+                                set(1);
+                                break;
+                            }
                         }
-                        if (event.key.code == sf::Keyboard::Num2)
+                        else if(gridLocalTouchPos.x < columnSize.x*3)
                         {
-                            Game::set(2);
+                            for(row=0;row<6;row++)
+                            {
+                                set(2);
+                                break;
+                            }
                         }
-                        if (event.key.code == sf::Keyboard::Num3)
+                        else if(gridLocalTouchPos.x < columnSize.x*4)
                         {
-                            Game::set(3);
+                            for(row=0;row<6;row++)
+                            {
+                                set(3);
+                                break;
+                            }
                         }
-                        if (event.key.code == sf::Keyboard::Num4)
+                        else if(gridLocalTouchPos.x < columnSize.x*5)
                         {
-                            Game::set(4);
+                            for(row=0;row<6;row++)
+                            {
+                                set(4);
+                                break;
+                            }
                         }
-                        if (event.key.code == sf::Keyboard::Num5)
+                        else if(gridLocalTouchPos.x < columnSize.x*6)
                         {
-                            Game::set(5);
+                            for(row=0;row<6;row++)
+                            {
+                                set(5);
+                                break;
+                            }
                         }
-                        if (event.key.code == sf::Keyboard::Num6)
+                        else if(gridLocalTouchPos.x > columnSize.x*6)
                         {
-                            Game::set(6);
+                            for(row=0;row<6;row++)
+                            {
+                                set(6);
+                                break;
+                            }
                         }
-                }
-                
+                    }
             }
+        }
+        
     }
-    
 }
 
 //Function to be called at the end of each turn, takes current window and redraws configuration to screen
@@ -518,25 +627,34 @@ void Game::draw_board(sf::RenderWindow & window)
     //load from file
     font.loadFromFile("/Users/ksua/Documents/cs202working/cs202working/arial.ttf");
     
-    // Create a text
-    // std::cout << getDisplayText() << std::endl;
+    // Create a text from a class string
     sf::Text text(getDisplayText(),font);
-    text.setCharacterSize(50);
-    text.setStyle(sf::Text::Bold);
-    text.setColor(sf::Color::White);
-    text.setPosition(800,300);
     
-   
+    //set font size
+    text.setCharacterSize(40);
+    
+    //Set style of text
+    text.setStyle(sf::Text::Bold);
+    
+    //Set color of text
+    text.setColor(sf::Color::White);
+    
+    //Set position of text
+    text.setPosition(SCREEN_WIDTH-270,SCREEN_HEIGHT-500);
+    
     // clear the window with black color
     window.clear(sf::Color::Black);
     
     
     //Draws retry button
     window.draw(_retrySprite);
-    //Draws board I believe
+    
+    //Draws board
     window.draw(_gridSprite);
     
-    window.draw(text); //wtf is going on??
+    //Draws text
+    window.draw(text);
+    
     
     //loop through rows
     for (int r=0; r<6; ++r)
@@ -544,11 +662,11 @@ void Game::draw_board(sf::RenderWindow & window)
         //loop through columns
         for(int c=0; c<7; ++c)
         {
-            //draw blank pieces
+            //Draw all Pieces
             window.draw(getConfig()[r][c]);
         }
     }
-  
+    
     // end the current frame
     window.display();
     
