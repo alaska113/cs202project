@@ -107,34 +107,32 @@ void Game::print_char_board()
 //then tells user if it has found a connect fou
 void Game::check(const Checker &ch)
 {
-    char gcolor;
-    char color = ch.getColorChar();
+    char gcolor='x';
+    sf::Color color;
+    if(ch.getColorChar() == 'r')
+        color = sf::Color::Red;
+    else
+        color = sf::Color::Yellow;
+    
     vector<vector<sf::Sprite>> v = Game::getConfig();
     
     //sets sum for counting sequential checkers to zero.
     int sum4 = 0;
     
-    
     //horizontal check
     //loop through rows
     for(auto i=0u;i<6;++i)
     {
+        sum4=0;
+        cout << i << " " << sum4 << endl;
         //loop through columns
         for(auto j=0u;j<7;++j)
         {
-            
-            if(v[i][j].getColor()==sf::Color::Red)
-            {
-                gcolor = 'r';
-            }
-            if(v[i][j].getColor()==sf::Color::Yellow)
-            {
-                gcolor = 'y';
-            }
             //if color in index is a match, add 1 to sequential count.
-            if(gcolor==color)
+            if(v[i][j].getColor()==color)
             {
                 ++sum4;
+                cout << i<<j<<" add1 " << sum4 << endl;
             }
             //if not, set sequential count back to zero.
             else
@@ -144,10 +142,10 @@ void Game::check(const Checker &ch)
             //If a connect four is found, tell user where it is.
             if(sum4==4)
             {
-                Game::setStatus(1);
+                Game::setStatus(true);
             }
         }
-        sum4=0;
+
     }
     
     
@@ -159,17 +157,7 @@ void Game::check(const Checker &ch)
         //loop threw rows
         for(auto j=0u;j<6;++j)
         {
-            if(v[j][i].getColor()==sf::Color::Red)
-            {
-                gcolor = 'r';
-            }
-            if(v[j][i].getColor()==sf::Color::Yellow)
-            {
-                gcolor = 'y';
-            }
-            
-            //check if index matches color
-            if(gcolor==color)
+            if(v[j][i].getColor()==color)
             {
                 ++sum4;
             }
@@ -181,7 +169,7 @@ void Game::check(const Checker &ch)
             //If a connect four is found, tell user where it is.
             if(sum4==4)
             {
-                Game::setStatus(1);
+                Game::setStatus(true);
             }
         }
         sum4=0;
@@ -210,17 +198,10 @@ void Game::check(const Checker &ch)
                     sum4=0;
                     break;
                 }
-                if(v[i-k][j+k].getColor()==sf::Color::Red)
-                {
-                    gcolor = 'r';
-                }
-                if(v[i-k][j+k].getColor()==sf::Color::Yellow)
-                {
-                    gcolor = 'y';
-                }
+
                 //If checker k spaces to the right and k spaces up matches
                 //add to sequential counter.
-                if(gcolor==color)
+                if(v[i-k][j+k].getColor()==color)
                 {
                     ++sum4;
                 }
@@ -232,7 +213,7 @@ void Game::check(const Checker &ch)
                 //If sequential counter is 4, let user know where a connect four has been made.
                 if(sum4==4)
                 {
-                    Game::setStatus(1);
+                    Game::setStatus(true);
                 }
             }
         }
@@ -261,18 +242,7 @@ void Game::check(const Checker &ch)
                     break;
                 }
                 
-                if(v[i-k][j-k].getColor()==sf::Color::Red)
-                {
-                    gcolor = 'r';
-                }
-                if(v[i-k][j-k].getColor()==sf::Color::Yellow)
-                {
-                    gcolor = 'y';
-                }
-                
-                //If checker k spaces to the left and k spaces up matches
-                //add to sequential counter.
-                if(gcolor==color)
+                if(v[i-k][j-k].getColor()==color)
                 {
                     ++sum4;
                 }
@@ -284,7 +254,7 @@ void Game::check(const Checker &ch)
                 //If sequential counter is 4, let user know where a connect four has been made.
                 if(sum4==4)
                 {
-                    Game::setStatus(1);
+                    Game::setStatus(true);
                 }
             }
         }
@@ -418,7 +388,7 @@ void Game::set(int col)
     Game::draw_board(window);
     Game::check(Piece);
     //6a// if true, tell user and reccomend retry button
-    if(getStatus() == 1)
+    if(getStatus())
     {
         std::cout << "I AM BEING CALLED at the end" << std::endl;
         Game::setDisplayText("A connect 4 has been made!");
@@ -458,7 +428,7 @@ void Game::run()
     sf::Texture _gridTexture; //declare board texture
     _gridTexture.loadFromFile("Connect4_Board.png"); //Set texture to board image
     _gridSprite.setTexture(_gridTexture);
-    _gridSprite.setPosition(50, 50);
+    _gridSprite.setPosition((SCREEN_WIDTH/2)-(_gridSprite.getGlobalBounds().width/2), (SCREEN_HEIGHT/2)-(_gridSprite.getGlobalBounds().height/2));
     
     //PIECES//
     //Make texture for empty piece
@@ -477,7 +447,7 @@ void Game::run()
             _gridPieces[r][c].setTexture(texturePlain);
             
             //be sure to set y stuff first then x. Due to the game checking stuff.
-            _gridPieces[r][c].setPosition(_gridSprite.getPosition().y+(tempSpriteSize.y*c)+5,_gridSprite.getPosition().x + (tempSpriteSize.x*r)+5);
+            _gridPieces[r][c].setPosition(_gridSprite.getPosition().x+(tempSpriteSize.x*c)+5,_gridSprite.getPosition().y + (tempSpriteSize.y*r)+5);
             
             //Sets pieces to white for empty
             _gridPieces[r][c].setColor(sf::Color::White);
