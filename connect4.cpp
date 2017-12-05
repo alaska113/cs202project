@@ -5,22 +5,20 @@
 //  Created by KSUA on 11/27/17.
 //  Copyright © 2017 Khan Howe. All rights reserved.
 //
+//This function file contains all necessary functions to construct the game of connect 4.
+//To play the game, simply make a call of the constructor Game("Title")
+//Select a column to drop a piece, or keys 1-7 to corresponding columns.
+//To reset the game, click the reset button in the upper right hand corner, or press escape.
 
 #include "connect4.hpp"
-#include "InputManager.hpp"
-#include <ctime>
 #include <stdlib.h>
-#include <time.h>
 #include <stdio.h>
 #include <iostream>
 #include <vector>
 #include <iomanip>
-#include <stdio.h>
-#include <memory>
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "ResourcePath.hpp"
-#include <stdexcept>
 using std::ostream;
 using std::endl;
 using std::cout;
@@ -75,6 +73,20 @@ void Checker::setColorChar(char color)
 //////////////
 //Game Stuff//
 //////////////
+
+void Game::retry()
+{
+    for(int i = 0;i<6;++i)
+    {
+        for(int j = 0;j<7;++j)
+        {
+            _gridPieces[i][j].setColor(sf::Color::White);
+        }
+    }
+    _retrySprite.setColor(sf::Color::Blue);
+    Game::setDisplayText("Game Reset!");
+    Game::setStatus(false);
+}
 
 //for use in debugging
 void Game::print_char_board()
@@ -198,7 +210,6 @@ void Game::check(const Checker &ch)
                 //Then move to next piece.
                 if(((j+k)>6) || ((i-k)<0))
                 {
-                    // cout << "I am breaking the boundary" << endl;
                     sum4=0;
                     break;
                 }
@@ -241,7 +252,6 @@ void Game::check(const Checker &ch)
                 //Then move to next piece.
                 if(((j-k)>6) || ((i-k)<0))
                 {
-                    //  cout << "I am breaking the boundary" << endl;
                     sum4=0;
                     break;
                 }
@@ -268,17 +278,6 @@ void Game::check(const Checker &ch)
 //Piece drop function
 void Game::addPiece(Checker & ch)
 {
-    
-    ///////////////////////////FIX THIS///////////////////////////////
-    //If the column is already full, prompt user to try another column
-    if(_gridPieces[0][ch.getColumn()].getColor() != sf::Color::White)
-    {
-        // throw runtime_error("Column full! Try another please.");
-        // std::cout <<
-        //turn(turn_n);
-    }
-    ////////////////////////////////////////////////////////////////////
-    
     //initialize empty space counter
     int k = 0;
     
@@ -385,10 +384,6 @@ void Game::set(int col)
     
     //4// Add Piece
     Game::addPiece(Piece);
-    //4a// if column is full, reset turn
-    if(_gridPieces[0][Piece.getColumn()].getColor() != sf::Color::White)
-    {
-    }
     
     //5// Draw Board after piece drop
     Game::draw_board(window);
@@ -496,6 +491,8 @@ void Game::run()
                     
                     //If a key was pressed
                 case sf::Event::KeyPressed:
+                    //if key pressed, retry sprite reset
+                    _retrySprite.setColor(sf::Color::White);
                     
                     //If the key that was pressed is 1, choose column 0
                     if (event.key.code == sf::Keyboard::Num1)
@@ -534,7 +531,16 @@ void Game::run()
                         Game::set(6);
                         break;
                     }
+                    
+                    //If escape is pressed, reset game
+                    if (event.key.code == sf::Keyboard::Escape)
+                    {
+                        Game::retry();
+                        break;
+                    }
                 case sf::Event::MouseButtonPressed:
+                    //if click made, reset button turned back white
+                    _retrySprite.setColor(sf::Color::White);
                     if (event.mouseButton.button == sf::Mouse::Left)
                     {
                         sf::Vector2i touchPoint {event.mouseButton.x,event.mouseButton.y};
@@ -552,6 +558,23 @@ void Game::run()
                         
                         int column, row=0;
                         //check which column the user has clicked
+                        
+                        
+                        //little bump in placement
+                        int bb = 50;
+                        
+                        //x-y bounds of sprite
+                        int right = (_retrySprite.getPosition().x)+(_retrySprite.getGlobalBounds().width) + bb;
+                        int left = (_retrySprite.getPosition().x)-(_retrySprite.getGlobalBounds().width/2) + bb;
+                        int top = 0;
+                        int bottom = (_retrySprite.getPosition().y)+(_retrySprite.getGlobalBounds().height) + bb;
+                        
+                        //If mousepress is within bounds of sprite, reset game.
+                        if((left< touchPoint.x)&&(right> touchPoint.x)&&(top<touchPoint.y)&&(bottom>touchPoint.y))
+                        {
+                            Game::retry();
+                            break;
+                        }
                         
                         //if it's in the first column, the x coordinate of the gridLocalTouchPos will be less than the size of the column itself
                         if(gridLocalTouchPos.x < columnSize.x)
@@ -639,6 +662,7 @@ void Game::draw_board(sf::RenderWindow & window)
     //Set color of text
     text.setColor(sf::Color::White);
     
+
     //Set position of text
     text.setPosition(SCREEN_WIDTH-270,SCREEN_HEIGHT-500);
     

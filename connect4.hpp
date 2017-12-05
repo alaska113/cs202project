@@ -13,16 +13,12 @@
 #define SCREEN_HEIGHT 700
 #include <iostream>
 #include <vector>
-#include <stdio.h>
-#include <memory>
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "ResourcePath.hpp"
-#include "InputManager.hpp"
 using std::vector;
 using std::ostream;
 using std::cout;
-#include <stdio.h>
 
 class Checker
 {
@@ -48,6 +44,8 @@ public:
     
     void set(int col);
     
+    void retry();
+
     //sets the on screen text to tell who's turn it is
     void turn_name(int turn_n);
     
@@ -107,8 +105,6 @@ public:
     //initializes window
     sf::RenderWindow window;
     
-    //inititalizes user input
-    InputManager input;
 private:
     //2D vector of sprites
     vector<vector<sf::Sprite>> _gridPieces;
