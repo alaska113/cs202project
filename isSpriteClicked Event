@@ -1,4 +1,4 @@
-            else if (event.mouseButton.button == sf::Mouse::Left)
+else if (event.mouseButton.button == sf::Mouse::Left)
             {
                     if (event.type== input.isSpriteClicked(_gridSprite,sf::Mouse::Left, window))
                     {
