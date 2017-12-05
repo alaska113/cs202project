@@ -9,8 +9,8 @@
 #ifndef connect4_hpp
 #define connect4_hpp
 #include <stdio.h>
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 1024
+#define SCREEN_WIDTH 1300
+#define SCREEN_HEIGHT 700
 #include <iostream>
 #include <vector>
 #include <stdio.h>
